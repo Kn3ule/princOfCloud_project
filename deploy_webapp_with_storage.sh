@@ -4,11 +4,12 @@
 RESOURCE_GROUP="princOfCloud_project_rg"
 STORAGE_ACCOUNT_NAME="princofcloudprojectsa"
 CONTAINER_NAME="princofcloud-project-sc-file"
-BLOB_NAME="my_app.zip"
+BLOB_NAME="testfile.txt"
+FILE="testfile.txt"
 APP_SERVICE_NAME='princOfCloud-project-lwa'
 SOURCE_DIRECTORY="web_app/my_web_app"
 TARGET_DIRECTORY="zip"
-FILE="testfile.txt"
+ZIP_FILE="web_app.zip"
 KEY_VAULT_NAME="princOfCloud-project-kv"
 
 #####################

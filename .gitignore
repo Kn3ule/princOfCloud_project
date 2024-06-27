@@ -33,6 +33,8 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-web_app
 .DS_Store
 .vscode*
+
+venv
+.env

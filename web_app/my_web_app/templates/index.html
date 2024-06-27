@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Blob Storage</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Azure Blob Storage</h1>
+        
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for message in messages %}
+            <div class="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="upload-section">
+            <h2>Upload File</h2>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+
+        <div class="files-section">
+            <h2>Files in Container</h2>
+            <ul>
+                {% for blob in blobs %}
+                <li>
+                    <a href="{{ url_for('download_file', filename=blob.name) }}">{{ blob.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
