@@ -1,5 +1,5 @@
 
-# Azure Linux Web App Deployment mit Terraform
+# Azure Linux Web App Deployment mit Terraform (Principles of Cloud and DevOps Engineering)
 
 Dieses Projekt beschreibt, wie man eine Azure Linux Web App mit einer systemzugewiesenen verwalteten Identität erstellt und die notwendigen Rollen und Berechtigungen für den Zugriff auf einen Azure Blob Storage und Azure Key Vault zuweist.
 
@@ -26,7 +26,7 @@ cd terraform
 
 ### 3. `main.tfvars` Datei erstellen und anpassen
 
-Erstelle eine `main.tfvars` Datei und setze die folgenden Werte entsprechend deiner Azure-Konfiguration:
+Erstelle eine `main.tfvars` Datei und setze die Werte TENANT_ID, SUBSCRIPTION_ID, OBJECT_ID entsprechend deiner Azure-Konfiguration:
 ```hcl
 ## SHARED
 TF_VAR_TENANT_ID       = "<your-tenant-id>"
@@ -83,9 +83,16 @@ cd ..
 ### 6. Shell-Skript ausführen, um die Web-App zu deployen
 
 Führe das Shell-Skript aus, um die Web-App und den Speicher zu deployen:
+
+Mac:
 ```bash
 chmod +x deploy_webapp_with_storage.sh
 ./deploy_webapp_with_storage.sh
+```
+
+Windows:
+```shell
+.\deploy_webapp_with_storage.ps1
 ```
 
 ## Struktur des Projekts
@@ -106,65 +113,7 @@ root-directory/
 
 ## Erklärung der Dateien
 
-- **main.tf**: Hauptkonfigurationsdatei, die die Ressourcen definiert.
+- **main.tf**: Hauptkonfigurationsdatei, die die Ressourcengruppe definiert.
 - **variables.tf**: Datei zur Deklaration der Variablen.
-- **terraform.tfvars**: Datei zur Bereitstellung der Variablenwerte.
-- **outputs.tf**: Datei zur Deklaration der Outputs.
-- **deploy_webapp_with_storage.sh**: Shell-Skript zur Bereitstellung der Web-App und des Speichers.
-
-## Nützliche Befehle
-
-### Azure CLI Befehle
-
-- Anmeldung bei Azure:
-```bash
-az login
-```
-
-- Anzeigen der verfügbaren Subscriptions:
-```bash
-az account list --output table
-```
-
-- Setzen der Subscription:
-```bash
-az account set --subscription <subscription-id>
-```
-
-### Terraform Befehle
-
-- Initialisieren des Terraform-Arbeitsverzeichnisses:
-```bash
-terraform init
-```
-
-- Erstellen eines Ausführungsplans:
-```bash
-terraform plan -var-file="main.tfvars"
-```
-
-- Anwenden des Ausführungsplans:
-```bash
-terraform apply -var-file="main.tfvars"
-```
-
-- Anzeigen des Zustands:
-```bash
-terraform show
-```
-
-- Löschen der bereitgestellten Ressourcen:
-```bash
-terraform destroy -var-file="main.tfvars"
-```
-
-## Hinweise
-
-Stelle sicher, dass alle erforderlichen Werte in der `terraform.tfvars` Datei korrekt gesetzt sind, bevor du die Terraform-Befehle ausführst. Das Shell-Skript `deploy_webapp_with_storage.sh` sollte ebenfalls ausführbar gemacht werden, bevor es ausgeführt wird:
-```bash
-chmod +x deploy_webapp_with_storage.sh
-```
-
-## Unterstützung
-
-Bei Fragen oder Problemen wende dich bitte an den Projektbetreuer.
+- **main.tfvars**: Datei zur Bereitstellung der Variablenwerte.
+- **deploy_webapp_with_storage.sh**: Shell-Skript zur Bereitstellung der Web-App und des Speichers. (MAC-Shell)
