@@ -71,8 +71,7 @@ Windows:
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass #Falls benötigt
 .\deploy_webapp_with_storage.ps1
 ```
-Wichtig:
-Bei einem Deployment Error unter Windows, Powershellskript nochmals ausführen!
+**Wichtig: Bei einem Deployment Error unter Windows, Powershellskript nochmals ausführen!**
 
 ## Struktur des Projekts
 
@@ -99,8 +98,8 @@ root-directory/
 - **storage.tf**: Konfigurationsdatei für den Storage Account, sowie die Storage Container.
 - **key_vault.tf**: Konfigurationsdatei für die Key-Vault + erstellen von Secrets.
 - **app_service**: Konfigurationsdatei für den App Service Plan + Linux Web App.
-- **deploy_webapp_with_storage.sh**: Shell-Skript zur Bereitstellung der Web-App und des Speichers. (MAC-Shell)
-- **deploy_webapp_with_storage.ps1**: Powershell-Skript zur Bereitstellung der Web-App und des Speichers. (Windows Powershell)
+- **deploy_webapp_with_storage.sh**: Shell-Skript zur Bereitstellung der Web-App und vorab Speicherung eines Text-Files in einem Blob. (MAC-Shell)
+- **deploy_webapp_with_storage.ps1**: Powershell-Skript zur Bereitstellung der Web-App und vorab Speicherung eines Text-Files in einem Blob. (Windows Powershell)
 
 ## Wichtige Code-Abschnitte in der Web Applikation (Anforderungen an das System)
 
