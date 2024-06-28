@@ -102,7 +102,7 @@ variable "TF_VAR_STORAGE_CONTAINER_ACCESS_TYPE"{
 
 
 #####################
-## APP SERVICE
+## APP SERVICE VARIABLES
 #####################
 
 # App Service Plan name
