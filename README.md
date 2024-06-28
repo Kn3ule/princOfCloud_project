@@ -1,5 +1,5 @@
 
-# Azure Linux Web App Deployment mit Terraform (Principles of Cloud and DevOps Engineering)
+# Projekt Principles of Cloud and DevOps Engineering
 Dieses Repository beinhaltet die Projektarbeit im Modul "Principles of Cloud and DevOps Engineering" an der Hochschule Aalen.
 
 Folgende Anforderungen an das System wurden gestellt:
