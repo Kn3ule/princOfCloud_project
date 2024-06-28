@@ -1,7 +1,12 @@
 
 # Azure Linux Web App Deployment mit Terraform (Principles of Cloud and DevOps Engineering)
+Dieses Repository beinhaltet die Projektarbeit im Modul "Principles of Cloud and DevOps Engineering" an der Hochschule Aalen.
 
-Dieses Projekt beschreibt, wie man eine Azure Linux Web App mit einer systemzugewiesenen verwalteten Identität erstellt und die notwendigen Rollen und Berechtigungen für den Zugriff auf einen Azure Blob Storage und Azure Key Vault zuweist.
+Folgende Anforderungen an das System wurden gestellt:
+
+Scripted/ Runnable Terraform Definition(s) for a cloud application
+• Application environment with web application on app service using keys from a key vault to read
+and create file in storage account
 
 ## Voraussetzungen
 
@@ -26,42 +31,13 @@ cd terraform
 
 ### 3. `main.tfvars` Datei erstellen und anpassen
 
-Erstelle eine `main.tfvars` Datei und setze die Werte TENANT_ID, SUBSCRIPTION_ID, OBJECT_ID entsprechend deiner Azure-Konfiguration:
+Öffne die `main.tfvars` Datei und setze die Werte TENANT_ID, SUBSCRIPTION_ID, OBJECT_ID entsprechend deiner Azure-Konfiguration:
 ```hcl
 ## SHARED
 TF_VAR_TENANT_ID       = "<your-tenant-id>"
 TF_VAR_SUBSCRIPTION_ID = "<your-subscription-id>"
 TF_VAR_LOCATION        = "northeurope"
 TF_VAR_OBJECT_ID       = "<your-object-id>" #verfügbar über folgenden CLI COMMAND: "az ad signed-in-user show" (id)
-
-
-## RESOURCE GROUP
-TF_VAR_RESOURCE_GROUP_NAME = "princOfCloud_project_rg"
-
-
-## KEY VAULT
-TF_VAR_KEYVAULT_NAME = "princOfCloud-project-kv"
-TF_VAR_SKU_NAME_KV = "standard"
-TF_VAR_SA_KEY_NAME = "storage-account-key"
-TF_VAR_FLASK_SECRET_KEY_NAME = "flask-secret-key"
-TF_VAR_FLASK_SECRET_KEY_VALUE ="BeispielSecretKey"
-
-
-
-## STORAGE ACCOUNT + CONTAINER
-TF_VAR_STORAGE_NAME = "princofcloudprojectsa"
-TF_VAR_STORAGE_ACCOUNT_TIER = "Standard"
-TF_VAR_STORAGE_REPLICATION_TYPE = "LRS"
-TF_VAR_FILE_CONTAINER_NAME = "princofcloud-project-sc-file"
-TF_VAR_STATE_CONTAINER_NAME = "princofcloud-project-tfstate"
-TF_VAR_STORAGE_CONTAINER_ACCESS_TYPE = "private"
-
-## APP SERVICE
-TF_VAR_SERVICE_PLAN_NAME = "princOfCloud-project-sp"
-TF_VAR_SERVICE_PLAN_OS = "Linux"
-TF_VAR_SERVICE_PLAN_SKU = "B1"
-TF_VAR_WEB_APP_NAME = "princOfCloud-project-lwa"
-TF_VAR_WEB_APP_HTTPS_ONLY = true
 ```
 
 ### 4. Terraform initialisieren, planen und anwenden
@@ -92,8 +68,11 @@ chmod +x deploy_webapp_with_storage.sh
 
 Windows:
 ```shell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass #Falls benötigt
 .\deploy_webapp_with_storage.ps1
 ```
+Wichtig:
+Bei einem Deployment Error unter Windows, Powershellskript nochmals ausführen!
 
 ## Struktur des Projekts
 
@@ -107,7 +86,8 @@ root-directory/
 │   ├── variables.tf
 │   ├── main.tfvars
 │   └── ...
-├── deploy_webapp_with_storage.sh
+├── deploy_webapp_with_storage.sh (OSX Shell-Skript)
+├── deploy_webapp_with_storage.ps1 (Windows Powershell-Skript)
 └── README.md
 ```
 
@@ -116,4 +96,61 @@ root-directory/
 - **main.tf**: Hauptkonfigurationsdatei, die die Ressourcengruppe definiert.
 - **variables.tf**: Datei zur Deklaration der Variablen.
 - **main.tfvars**: Datei zur Bereitstellung der Variablenwerte.
+- **storage.tf**: Konfigurationsdatei für den Storage Account, sowie die Storage Container.
+- **key_vault.tf**: Konfigurationsdatei für die Key-Vault + erstellen von Secrets.
+- **app_service**: Konfigurationsdatei für den App Service Plan + Linux Web App.
 - **deploy_webapp_with_storage.sh**: Shell-Skript zur Bereitstellung der Web-App und des Speichers. (MAC-Shell)
+- **deploy_webapp_with_storage.ps1**: Powershell-Skript zur Bereitstellung der Web-App und des Speichers. (Windows Powershell)
+
+## Wichtige Code-Abschnitte in der Web Applikation (Anforderungen an das System)
+
+Kommunikation mit dem Key Vault:
+Hierbei wurde der Flask-Secret-Key (definiert in key_vault.tf) aus dem Key-Vault gelesen und in der Flask-App initiiert.
+```python
+# Azure Key Vault configuration
+key_vault_url = os.getenv('KEY_VAULT_URL')
+secret_client = SecretClient(vault_url=key_vault_url, credential=credential)
+flask_secret_key = secret_client.get_secret('flask-secret-key').value
+
+#app.secret_key = 'SehrSaferKey'  # Needed for flashing messages
+app.secret_key = flask_secret_key  # Needed for flashing messages
+```
+
+Erstellen und Lesen von Files:
+Hierbei wurden Files in einem Blob im Container abgelegt und angezeigt.
+```python
+blob_service_client = BlobServiceClient(
+        account_url= os.getenv('AZURE_STORAGE_ACCOUNT_URL'),
+        credential=credential)
+
+container_name = os.getenv('AZURE_STORAGE_CONTAINER_NAME')
+container_client = blob_service_client.get_container_client(container_name)
+
+
+@app.route('/')
+def index():
+    blob_list = container_client.list_blobs()
+    blobs = [{"name": blob.name, "url": blob_service_client.get_blob_client(container_name, blob.name).url} for blob in blob_list]
+    return render_template('index.html', blobs=blobs)
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files or request.files['file'].filename == '':
+        flash('Bitte wählen Sie eine Datei aus, bevor Sie auf "Upload" klicken.')
+        return redirect(url_for('index'))
+    
+    file = request.files['file']
+    blob_client = container_client.get_blob_client(file.filename)
+    blob_client.upload_blob(file, overwrite=True)
+    flash('Datei erfolgreich hochgeladen.')
+    return redirect(url_for('index'))
+
+@app.route('/download/<filename>', methods=['GET'])
+def download_file(filename):
+    blob_client = container_client.get_blob_client(filename)
+    if blob_client.exists():
+        download_stream = blob_client.download_blob()
+        return send_file(io.BytesIO(download_stream.readall()), download_name=filename, as_attachment=True)
+    return jsonify({"message": "File not found"}), 404
+```
+
